@@ -123,6 +123,33 @@ class API:
 		op = "Stored a new " + parameter + ", value: " + str(value)
 		print op
 
+	def send_reading(self, parameter, value):
+		if( self.ready == True ):
+			#This function sends a single reading
+			#Update time to the correct time
+			self.update_time()
+			reading = {
+				'time': self.time,
+				'parameter': parameter,
+				'reading': value
+			}
+			submit = []
+			submit.append(reading)
+
+			dest = self.api_uri + "submit_weather.php"
+			payload = {
+				'token':self.config['token'],
+				'time': self.time,
+				'readings': json.dumps(submit)
+				}
+
+		
+			req = requests.post(dest, data=payload)
+			response = req.json()
+			print(json.dumps(response, indent=4, sort_keys=True))
+		else:
+			print "Unable to send reading - not ready"
+
 	def save(self):
 		#Save any store readings as in a save file:
 		exists = os.path.isfile("saved_readings.json")
