@@ -7,8 +7,10 @@ class API:
 	}
 	ready = False
 	time = int(time.time())
+	readings = []
 
 	def __init__(self, quiet=False):
+		#Quiet mode prevents output (mainly for registering)
 		if quiet == True:
 			self.disablePrint()
 		print("Initialising API")
@@ -68,7 +70,6 @@ class API:
 		self.enablePrint()
 		return
 
-
 	def register(self):
 		d = raw_input("What is this device?: ")
 		v = raw_input( "What is the device version?: ")
@@ -108,10 +109,45 @@ class API:
 			print("Error: Could not register user")
 			print(req.text)
 
+	def store_reading(self, parameter, value):
+		#This function stores readings in the internal array
+		#This is important in case the device can't connect to the internet
+		#Update time to the correct time
+		self.update_time()
+		reading = {
+			'time': self.time,
+			'parameter': parameter,
+			'reading:': value
+		}
+		self.readings.append(reading)
+		op = "Stored a new " + parameter + ", value: " + str(value)
+		print op
+
+	def save(self):
+		#Save any store readings as in a save file:
+		exists = os.path.isfile("saved_readings.json")
+		if exists == True:
+			print "There are already some saved readings - Merging"
+			f = open("saved_readings.json", "r")
+			old_readings = json.loads(f.read())
+			f.close()
+			self.readings = old_readings + self.readings
+			f = open("saved_readings.json", "w")
+			f.write(json.dumps(self.readings))
+			f.close()
+			print "Success: Saved Readings to saved_readings.json"
+		else:
+			print "Saving Readings to new file"
+			f = open("saved_readings.json", "w")
+			f.write(json.dumps(self.readings))
+			f.close()
+			print "Success: Saved Readings to saved_readings.json"
+
 	def disablePrint(self):
 		sys.stdout = open(os.devnull, "w")
 
 	def enablePrint(self):
 		sys.stdout = sys.__stdout__
 
-
+	def update_time(self):
+		self.time = int(time.time())
