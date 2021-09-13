@@ -71,17 +71,30 @@ class API:
 		return
 
 	def register(self):
+		print("INFO: Registration Beginning - please answer these questions to proceed\n")
+		c = getpass.getpass("What is the credential for registering a device?: ")
 		d = raw_input("What is this device?: ")
 		v = raw_input( "What is the device version?: ")
 		l = raw_input( "Where is the device located?: ")
-		c = getpass.getpass("What is the credential for registering a device?: ")
-		print( "Attempting to register device - please wait...")
+		identifier = d + "_" + v + "_" + l;
+		identifier = identifier.replace(" ", "_")
+		check = "Your device identifier will be: " + identifier + "\n"
+		print( check )
+		happy = raw_input("Would you like to customise this identifier? (Y/N)  ")
+		if( happy == "Y" ):
+			identifier = raw_input("Please provide a device identifier: alpha/numeric/-/_ only:  " )
+			print( "\nProceeding with custom identifier" )
+		elif( happy == "N"):
+			print ("\nProceeding with default identifer")
+		
+		print( "Attempting to register device - please wait...\n")
 		dest = self.api_uri + "register.php"
 		payload = {
 			'credential':c,
 			'device_name':d,
 			'device_version':v,
-			'location':l
+			'location':l,
+			'identifier':identifier
 		}
 		req = requests.post(dest, data=payload)
 		resp = req.json()
@@ -91,6 +104,7 @@ class API:
 			self.config['device_version'] = v
 			self.config['location'] = l
 			self.config['token'] = resp['token']
+			self.config['identifier'] = identifier
 			#Check if a config file exists
 			exists = os.path.isfile("api_config.json")
 			if exists == True:
@@ -137,8 +151,12 @@ class API:
 			submit.append(reading)
 
 			dest = self.api_uri + "submit_weather.php"
+
+			print( "Checking idenifier", self.config['identifier'])
+
 			payload = {
 				'token':self.config['token'],
+				'identifier':self.config['identifier'],
 				'time': self.time,
 				'readings': json.dumps(submit)
 				}
