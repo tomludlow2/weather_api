@@ -162,9 +162,15 @@ class API:
 			req = requests.post(dest, data=payload)
 			response = req.json()
 			if response['insertion_success'] == True:
-				print "Success: Reading has been saved"
+				if response.get('failed_readings', None) == None:
+					print "Success: Reading has been sent to the server"
+				else:
+					print "Error: Reading could not be saved to the server:"
+					print "Info: The accepted variables on the server are:"
+					print response['accepted_parameters']
+					print "Info: This reading has not been saved locally/remotely - ensure server accepts this reading"
 			else:
-				print( "ERROR While storing data" )
+				print( "Error: While storing data" )
 				print(json.dumps(response, indent=4, sort_keys=True))
 		else:
 			print "Unable to send reading - not ready"
@@ -239,6 +245,67 @@ class API:
 				op = op + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(r['time']))
 				op = op + "- " + r['parameter'] + ": " + str( r['reading']) + "\n"
 			print(op)
+		else:
+			print( "Info: There are no saved readings")
+
+	def send_saved_readings(self):
+		#Sends the saved readings to the server and then, if successful, removes them
+		exists = os.path.isfile("saved_readings.json")
+		if exists == True:
+			print("There are files to be sent - attempting to do so")
+			f = open( "saved_readings.json", "r")
+			readings = json.loads(f.read())
+			f.close()
+			dest = self.api_uri + "submit_weather.php"
+			payload = {
+				'token':self.config['token'],
+				'identifier':self.config['identifier'],
+				'time': self.time,
+				'readings': json.dumps(readings)
+				}
+
+			req = requests.post(dest, data=payload)
+			response = req.json()
+			print response
+			if response['insertion_success'] == True:
+				if response.get('failed_readings', None) == None:
+					print "Success: Readings has been sent to the server - removing local file"
+					os.remove("saved_readings.json")
+				else:
+					print "WARNING: Some readings were saved, however there were some that were not."
+					print "Info: The accepted variables on the server are:"
+					print response['accepted_parameters']
+					print "Info: There were some readings that did not match these:"
+					print json.dumps(response['failed_readings'], indent=4, sort_keys=True)
+					print "The saved_readings file is going to be deleted to prevent duplication"
+					os.remove("saved_readings.json")
+					conf = raw_input("WARNING: Would you like to save the readings that did not submit? Y/N ")
+					if conf == "Y" or conf == "y":
+						if os.path.isfile("failed_readings.json") == True:
+							print "There are already some failed readings - Merging"
+							f = open("failed_readings.json", "r")
+							old_readings = json.loads(f.read())
+							f.close()
+							failed_readings = old_readings + response['failed_readings']
+							f = open("failed_readings.json", "w")
+							f.write(json.dumps(failed_readings))
+							f.close()
+							print "Success: Saved Readings to failed_readings.json"
+							print "You may wish to input these values manually, or adjust the server to accept these values"
+						else:
+							print "Creating a failed_readings.json file"
+							f = open("failed_readings.json", "w")
+							failed_readings = response['failed_readings']
+							f.write(json.dumps(failed_readings))
+							f.close()
+							print "Success: Saved Readings to failed_readings.json"
+							print "You may wish to input these values manually, or adjust the server to accept these values"
+					else:
+						print "OK - these readings have been lost"
+				
+			else:
+				print( "Error While sending data - data has not been deleted" )
+				print(json.dumps(response, indent=4, sort_keys=True))
 		else:
 			print( "Info: There are no saved readings")
 

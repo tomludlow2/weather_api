@@ -52,6 +52,14 @@ Functions include:
 - Anticipate usage will be for taking e.g. Temperature + Humidity at the same time and then send them together
 - Not for, for example, storing multiple readings over time and then send them together as their timestamps will not be sent correctly
 
+#### Send saved readings:
+- Template File for this: **test_send_saved_readings.py**
+- This will open the saved_readings.json file, load in the readings, and then attempt to send them
+- This will either lead to Success - in which case they have all been sent
+- Or it will lead to failure either due to a server issue OR
+- If you have saved a parameter that your server is not configured to accept, it will let you know
+- It will then offer you the option of saving the "failed readings" into a new json file for later manipulation
+- If you choose not to do this, the failed readings will be lost.
 
 ## Acceptable Readings Supported:
 - temperature
