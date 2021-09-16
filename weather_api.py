@@ -123,15 +123,15 @@ class API:
 			print("Error: Could not register user")
 			print(req.text)
 
-	def store_reading(self, parameter, value):
-		#This function stores readings in the internal array
+	def save_reading(self, parameter, value):
+		#This function saves readings in the internal array
 		#This is important in case the device can't connect to the internet
 		#Update time to the correct time
 		self.update_time()
 		reading = {
 			'time': self.time,
 			'parameter': parameter,
-			'reading:': value
+			'reading': value
 		}
 		self.readings.append(reading)
 		op = "Stored a new " + parameter + ", value: " + str(value)
@@ -169,14 +169,23 @@ class API:
 		else:
 			print "Unable to send reading - not ready"
 
-	def send_multiple(self readings):
+	def send_multiple(self, readings):
 		if( self.ready == True):
 			#This function is very similar yo send_reading but sends multiple readings (accepts a LIST)
+			#Format of list is [ {"temperature":24.0},{"humidity":65.0}] etc
+			#Therefore timestamp will  be same on all readings
 			#Update time to correct time:
 			self.update_time()
 			submit = []
 			for reading in readings:
-				submit.append(reading)
+				#Create the correct format for submission
+				new_reading = {
+					'time':self.time
+				}
+				for key in reading:
+					new_reading['parameter'] = key
+					new_reading['reading'] = reading[key]
+				submit.append(new_reading)
 			dest = self.api_uri + "submit_weather.php"
 			payload = {
 				'token':self.config['token'],
@@ -184,6 +193,8 @@ class API:
 				'time': self.time,
 				'readings': json.dumps(submit)
 				}
+			print( "Preparing to send multiple readings")
+			print(json.dumps(payload, indent=4, sort_keys=False))
 			req = requests.post(dest, data=payload)
 			response = req.json()
 			if response['insertion_success'] == True:
@@ -214,6 +225,22 @@ class API:
 			f.write(json.dumps(self.readings))
 			f.close()
 			print "Success: Saved Readings to saved_readings.json"
+
+	def read_saved(self):
+		#Writes out the saved readings pending submission:
+		exists = os.path.isfile("saved_readings.json")
+		if exists == True:
+			f = open( "saved_readings.json", "r")
+			readings = json.loads(f.read())
+			f.close()
+			print( "Readings opened:")
+			op = ""
+			for r in readings:
+				op = op + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(r['time']))
+				op = op + "- " + r['parameter'] + ": " + str( r['reading']) + "\n"
+			print(op)
+		else:
+			print( "Info: There are no saved readings")
 
 	def disablePrint(self):
 		sys.stdout = open(os.devnull, "w")

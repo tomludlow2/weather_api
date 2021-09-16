@@ -26,13 +26,17 @@ Functions include:
 3. api = weather_api.API()
 4. if api.ready == True: You're ready to go using one of the following files / methods
 
-## Store a reading
-- Template File for this:  **test_store_reading.py**
+## Save a reading
+- Template File for this:  **test_save_reading.py**
 - import weather_api, create an instance, 
-- Then:api.store_reading( paramater, value )
+- Then:api.save_reading( paramater, value )
 - Then: api.save()
 -   This saves the readings to a local file
 -   This does not require network access
+
+#### Load a reading
+- Template File for this: **test_load_saved_readings.py**
+- This will load and print out the saved readings
 
 ## Send Readings
 - This requires a network connection
