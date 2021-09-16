@@ -151,9 +151,6 @@ class API:
 			submit.append(reading)
 
 			dest = self.api_uri + "submit_weather.php"
-
-			print( "Checking idenifier", self.config['identifier'])
-
 			payload = {
 				'token':self.config['token'],
 				'identifier':self.config['identifier'],
@@ -164,9 +161,39 @@ class API:
 		
 			req = requests.post(dest, data=payload)
 			response = req.json()
-			print(json.dumps(response, indent=4, sort_keys=True))
+			if response['insertion_success'] == True:
+				print "Success: Reading has been saved"
+			else:
+				print( "ERROR While storing data" )
+				print(json.dumps(response, indent=4, sort_keys=True))
 		else:
 			print "Unable to send reading - not ready"
+
+	def send_multiple(self readings):
+		if( self.ready == True):
+			#This function is very similar yo send_reading but sends multiple readings (accepts a LIST)
+			#Update time to correct time:
+			self.update_time()
+			submit = []
+			for reading in readings:
+				submit.append(reading)
+			dest = self.api_uri + "submit_weather.php"
+			payload = {
+				'token':self.config['token'],
+				'identifier':self.config['identifier'],
+				'time': self.time,
+				'readings': json.dumps(submit)
+				}
+			req = requests.post(dest, data=payload)
+			response = req.json()
+			if response['insertion_success'] == True:
+				print( "Success: Readings have been submitted")
+			else:
+				print( "Error: Readings could not be submitted")
+				print( json.dumps(response, indent=4, sort_keys=True))
+		else:
+			print "Unable to send readings - not ready"
+
 
 	def save(self):
 		#Save any store readings as in a save file:
