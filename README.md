@@ -27,16 +27,26 @@ Functions include:
 4. if api.ready == True: You're ready to go using one of the following files / methods
 
 ## Store a reading
-- Template File for this:  test_store_reading.py
+- Template File for this:  **test_store_reading.py**
 - import weather_api, create an instance, 
 - Then:api.store_reading( paramater, value )
 - Then: api.save()
 -   This saves the readings to a local file
 -   This does not require network access
 
-## Send the readings
+## Send Readings
 - This requires a network connection
-- Template File for this: test_send_reading.py
+
+#### Send a single reading
+- Template File for this: **test_send_reading.py**
+- Very simple mechanism to just send one reading
+- Just pass (paramater, reading) and it will send
+
+#### Send mutiple readings:
+- Template File for this:  **test_send_multiple.py**
+- This is for sending multiple readings together (will have the same timestamp
+- Anticipate usage will be for taking e.g. Temperature + Humidity at the same time and then send them together
+- Not for, for example, storing multiple readings over time and then send them together as their timestamps will not be sent correctly
 
 
 ## Acceptable Readings Supported:
