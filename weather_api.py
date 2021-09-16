@@ -203,7 +203,7 @@ class API:
 				'readings': json.dumps(submit)
 				}
 			print( "Preparing to send multiple readings")
-			print(json.dumps(payload, indent=4, sort_keys=False))
+			#print(json.dumps(payload, indent=4, sort_keys=False))
 			req = requests.post(dest, data=payload)
 			response = req.json()
 			if response['insertion_success'] == True:

@@ -1,5 +1,5 @@
 api_config.json
 saved_readings.json
-weather_api.pyc
+*.pyc
 *.json
 send_data.py
