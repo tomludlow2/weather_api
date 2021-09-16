@@ -8,15 +8,18 @@ class API:
 	ready = False
 	time = int(time.time())
 	readings = []
+	CONFIG_FILENAME = os.path.join(os.path.dirname(__file__), 'api_config.json')
+	SAVED_READINGS_FILENAME = os.path.join(os.path.dirname(__file__), 'saved_readings.json')	
+	FAILED_READINGS_FILENAME = os.path.join(os.path.dirname(__file__), 'failed_readings.json')
 
 	def __init__(self, quiet=False):
 		#Quiet mode prevents output (mainly for registering)
 		if quiet == True:
 			self.disablePrint()
 		print("Initialising API")
-		if os.path.isfile("api_config.json") == True:
+		if os.path.isfile(self.CONFIG_FILENAME) == True:
 			print ("Loading API Configuration" )
-			f = open("api_config.json", "r")
+			f = open(self.CONFIG_FILENAME, "r")
 			self.config = json.loads(f.read())
 			f.close()
 			print ("Config Loaded")
@@ -106,16 +109,16 @@ class API:
 			self.config['token'] = resp['token']
 			self.config['identifier'] = identifier
 			#Check if a config file exists
-			exists = os.path.isfile("api_config.json")
+			exists = os.path.isfile(self.CONFIG_FILENAME)
 			if exists == True:
 				print( "Info: Config file already exists - overwriting with new registration")
-				f = open("api_config.json", "w")
+				f = open(self.CONFIG_FILENAME, "w")
 				f.write(json.dumps(self.config))
 				f.close()
 				print ("Success: Config file re-created")
 			else:
 				print( "Info: Creating first config file")
-				f = open("api_config.json", "w")
+				f = open(self.CONFIG_FILENAME, "w")
 				f.write(json.dumps(self.config))
 				f.close()
 				print ("Success: API has been registered, and config details have been stored")
@@ -214,29 +217,29 @@ class API:
 
 	def save(self):
 		#Save any store readings as in a save file:
-		exists = os.path.isfile("saved_readings.json")
+		exists = os.path.isfile(self.SAVED_READINGS_FILENAME)
 		if exists == True:
 			print "There are already some saved readings - Merging"
-			f = open("saved_readings.json", "r")
+			f = open(self.SAVED_READINGS_FILENAME, "r")
 			old_readings = json.loads(f.read())
 			f.close()
 			self.readings = old_readings + self.readings
-			f = open("saved_readings.json", "w")
+			f = open(self.SAVED_READINGS_FILENAME, "w")
 			f.write(json.dumps(self.readings))
 			f.close()
 			print "Success: Saved Readings to saved_readings.json"
 		else:
 			print "Saving Readings to new file"
-			f = open("saved_readings.json", "w")
+			f = open(self.SAVED_READINGS_FILENAME, "w")
 			f.write(json.dumps(self.readings))
 			f.close()
 			print "Success: Saved Readings to saved_readings.json"
 
 	def read_saved(self):
 		#Writes out the saved readings pending submission:
-		exists = os.path.isfile("saved_readings.json")
+		exists = os.path.isfile(self.SAVED_READINGS_FILENAME)
 		if exists == True:
-			f = open( "saved_readings.json", "r")
+			f = open( self.SAVED_READINGS_FILENAME, "r")
 			readings = json.loads(f.read())
 			f.close()
 			print( "Readings opened:")
@@ -250,10 +253,10 @@ class API:
 
 	def send_saved_readings(self):
 		#Sends the saved readings to the server and then, if successful, removes them
-		exists = os.path.isfile("saved_readings.json")
+		exists = os.path.isfile(self.SAVED_READINGS_FILENAME)
 		if exists == True:
 			print("There are files to be sent - attempting to do so")
-			f = open( "saved_readings.json", "r")
+			f = open( self.SAVED_READINGS_FILENAME, "r")
 			readings = json.loads(f.read())
 			f.close()
 			dest = self.api_uri + "submit_weather.php"
@@ -278,23 +281,23 @@ class API:
 					print "Info: There were some readings that did not match these:"
 					print json.dumps(response['failed_readings'], indent=4, sort_keys=True)
 					print "The saved_readings file is going to be deleted to prevent duplication"
-					os.remove("saved_readings.json")
+					os.remove(self.SAVED_READINGS_FILENAME)
 					conf = raw_input("WARNING: Would you like to save the readings that did not submit? Y/N ")
 					if conf == "Y" or conf == "y":
 						if os.path.isfile("failed_readings.json") == True:
 							print "There are already some failed readings - Merging"
-							f = open("failed_readings.json", "r")
+							f = open(self.FAILED_READINGS_FILENAME, "r")
 							old_readings = json.loads(f.read())
 							f.close()
 							failed_readings = old_readings + response['failed_readings']
-							f = open("failed_readings.json", "w")
+							f = open(self.FAILED_READINGS_FILENAME, "w")
 							f.write(json.dumps(failed_readings))
 							f.close()
 							print "Success: Saved Readings to failed_readings.json"
 							print "You may wish to input these values manually, or adjust the server to accept these values"
 						else:
 							print "Creating a failed_readings.json file"
-							f = open("failed_readings.json", "w")
+							f = open(self.FAILED_READINGS_FILENAME, "w")
 							failed_readings = response['failed_readings']
 							f.write(json.dumps(failed_readings))
 							f.close()
