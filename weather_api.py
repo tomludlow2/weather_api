@@ -138,7 +138,7 @@ class API:
 		}
 		self.readings.append(reading)
 		op = "Stored a new " + parameter + ", value: " + str(value)
-		print op
+		print(op)
 
 	def send_reading(self, parameter, value):
 		if( self.ready == True ):
@@ -166,17 +166,17 @@ class API:
 			response = req.json()
 			if response['insertion_success'] == True:
 				if response.get('failed_readings', None) == None:
-					print "Success: Reading has been sent to the server"
+					print("Success: Reading has been sent to the server")
 				else:
-					print "Error: Reading could not be saved to the server:"
-					print "Info: The accepted variables on the server are:"
-					print response['accepted_parameters']
-					print "Info: This reading has not been saved locally/remotely - ensure server accepts this reading"
+					print("Error: Reading could not be saved to the server:")
+					print("Info: The accepted variables on the server are:")
+					print(response['accepted_parameters'])
+					print("Info: This reading has not been saved locally/remotely - ensure server accepts this reading")
 			else:
 				print( "Error: While storing data" )
 				print(json.dumps(response, indent=4, sort_keys=True))
 		else:
-			print "Unable to send reading - not ready"
+			print("Unable to send reading - not ready")
 
 	def send_multiple(self, readings):
 		if( self.ready == True):
@@ -212,14 +212,14 @@ class API:
 				print( "Error: Readings could not be submitted")
 				print( json.dumps(response, indent=4, sort_keys=True))
 		else:
-			print "Unable to send readings - not ready"
+			print("Unable to send readings - not ready")
 
 
 	def save(self):
 		#Save any store readings as in a save file:
 		exists = os.path.isfile(self.SAVED_READINGS_FILENAME)
 		if exists == True:
-			print "There are already some saved readings - Merging"
+			print("There are already some saved readings - Merging")
 			f = open(self.SAVED_READINGS_FILENAME, "r")
 			old_readings = json.loads(f.read())
 			f.close()
@@ -227,13 +227,13 @@ class API:
 			f = open(self.SAVED_READINGS_FILENAME, "w")
 			f.write(json.dumps(self.readings))
 			f.close()
-			print "Success: Saved Readings to saved_readings.json"
+			print("Success: Saved Readings to saved_readings.json")
 		else:
-			print "Saving Readings to new file"
+			print("Saving Readings to new file")
 			f = open(self.SAVED_READINGS_FILENAME, "w")
 			f.write(json.dumps(self.readings))
 			f.close()
-			print "Success: Saved Readings to saved_readings.json"
+			print("Success: Saved Readings to saved_readings.json")
 
 	def read_saved(self):
 		#Writes out the saved readings pending submission:
@@ -269,18 +269,18 @@ class API:
 
 			req = requests.post(dest, data=payload)
 			response = req.json()
-			print response
+			print(response)
 			if response['insertion_success'] == True:
 				if response.get('failed_readings', None) == None:
-					print "Success: Readings has been sent to the server - removing local file"
+					print("Success: Readings has been sent to the server - removing local file")
 					os.remove("saved_readings.json")
 				else:
-					print "WARNING: Some readings were saved, however there were some that were not."
-					print "Info: The accepted variables on the server are:"
-					print response['accepted_parameters']
-					print "Info: There were some readings that did not match these:"
-					print json.dumps(response['failed_readings'], indent=4, sort_keys=True)
-					print "The saved_readings file is going to be deleted to prevent duplication"
+					print("WARNING: Some readings were saved, however there were some that were not.")
+					print("Info: The accepted variables on the server are:")
+					print(response['accepted_parameters'])
+					print("Info: There were some readings that did not match these:")
+					print(json.dumps(response['failed_readings'], indent=4, sort_keys=True))
+					print("The saved_readings file is going to be deleted to prevent duplication")
 					os.remove(self.SAVED_READINGS_FILENAME)
 					conf = raw_input("WARNING: Would you like to save the readings that did not submit? Y/N ")
 					if conf == "Y" or conf == "y":
@@ -293,18 +293,18 @@ class API:
 							f = open(self.FAILED_READINGS_FILENAME, "w")
 							f.write(json.dumps(failed_readings))
 							f.close()
-							print "Success: Saved Readings to failed_readings.json"
-							print "You may wish to input these values manually, or adjust the server to accept these values"
+							print("Success: Saved Readings to failed_readings.json")
+							print("You may wish to input these values manually, or adjust the server to accept these values")
 						else:
-							print "Creating a failed_readings.json file"
+							print("Creating a failed_readings.json file")
 							f = open(self.FAILED_READINGS_FILENAME, "w")
 							failed_readings = response['failed_readings']
 							f.write(json.dumps(failed_readings))
 							f.close()
-							print "Success: Saved Readings to failed_readings.json"
-							print "You may wish to input these values manually, or adjust the server to accept these values"
+							print("Success: Saved Readings to failed_readings.json")
+							print("You may wish to input these values manually, or adjust the server to accept these values")
 					else:
-						print "OK - these readings have been lost"
+						print("OK - these readings have been lost")
 				
 			else:
 				print( "Error While sending data - data has not been deleted" )
