@@ -76,16 +76,16 @@ class API:
 	def register(self):
 		print("INFO: Registration Beginning - please answer these questions to proceed\n")
 		c = getpass.getpass("What is the credential for registering a device?: ")
-		d = raw_input("What is this device?: ")
-		v = raw_input( "What is the device version?: ")
-		l = raw_input( "Where is the device located?: ")
+		d = input("What is this device?: ")
+		v = input( "What is the device version?: ")
+		l = input( "Where is the device located?: ")
 		identifier = d + "_" + v + "_" + l;
 		identifier = identifier.replace(" ", "_")
 		check = "Your device identifier will be: " + identifier + "\n"
 		print( check )
-		happy = raw_input("Would you like to customise this identifier? (Y/N)  ")
+		happy = input("Would you like to customise this identifier? (Y/N)  ")
 		if( happy == "Y" ):
-			identifier = raw_input("Please provide a device identifier: alpha/numeric/-/_ only:  " )
+			identifier = input("Please provide a device identifier: alpha/numeric/-/_ only:  " )
 			print( "\nProceeding with custom identifier" )
 		elif( happy == "N"):
 			print ("\nProceeding with default identifer")
@@ -282,7 +282,7 @@ class API:
 					print(json.dumps(response['failed_readings'], indent=4, sort_keys=True))
 					print("The saved_readings file is going to be deleted to prevent duplication")
 					os.remove(self.SAVED_READINGS_FILENAME)
-					conf = raw_input("WARNING: Would you like to save the readings that did not submit? Y/N ")
+					conf = input("WARNING: Would you like to save the readings that did not submit? Y/N ")
 					if conf == "Y" or conf == "y":
 						if os.path.isfile("failed_readings.json") == True:
 							print("There are already some failed readings - Merging")
