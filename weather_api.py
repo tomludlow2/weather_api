@@ -285,7 +285,7 @@ class API:
 					conf = raw_input("WARNING: Would you like to save the readings that did not submit? Y/N ")
 					if conf == "Y" or conf == "y":
 						if os.path.isfile("failed_readings.json") == True:
-							print "There are already some failed readings - Merging"
+							print("There are already some failed readings - Merging")
 							f = open(self.FAILED_READINGS_FILENAME, "r")
 							old_readings = json.loads(f.read())
 							f.close()
